@@ -1,7 +1,6 @@
 # services/coingecko.py
 import httpx
 from cachetools import TTLCache
-import asyncio
 
 BASE_URL = "https://api.coingecko.com/api/v3"
 # Cliente reutilizable con timeout razonable
@@ -9,10 +8,9 @@ client = httpx.AsyncClient(timeout=10.0)
 
 # Cache: símbolo -> coin_id
 coin_id_cache = TTLCache(maxsize=10000, ttl=3600)  # 1 hora
-# Cache: simple/price responses (por ids+vs_currencies)
-price_cache = TTLCache(maxsize=2000, ttl=20)  # 20s, evita demasiadas requests
+price_cache = TTLCache(maxsize=2000, ttl=20) 
 
-# Conjunto de fiats comunes (expandir si quieres)
+# Conjunto de fiats comunes
 FIATS = {
     "usd", "eur", "mxn", "cop", "ars", "pen", "brl", "clp", "gbp", "jpy", "cad", "aud"
 }
@@ -119,7 +117,6 @@ async def convert_currency(from_symbol: str, to_symbol: str, amount: float, debu
         "notes": []
     }
 
-    # Si ambos son fiat, no soportado aquí (podemos agregar after)
     if from_is_fiat and to_is_fiat:
         result_debug["notes"].append("Both sides are fiat - fiat->fiat not supported by this endpoint.")
         return (None if not debug else {"error": "fiat->fiat not supported", "debug": result_debug})
