@@ -1,0 +1,5 @@
+cachetools
+httpx
+fastapi[standard]
+uvicorn[standard]
+pydantic
