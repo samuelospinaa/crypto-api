@@ -1,9 +1,17 @@
 from fastapi import FastAPI
+import os
+import httpx
+from dotenv import load_dotenv
 from services.binance import get_binance_price
 from services.coinbase import get_coinbase_price
 from services.kraken import get_kraken_price
 from services.kucoin import get_kucoin_price
 from services.coingecko import convert_currency
+
+load_dotenv()  # Cargar variables de entorno
+
+COINGECKO_API = os.getenv("COINGECKO_API")
+COINPAPRIKA_API = os.getenv("COINPAPRIKA_API")
 
 app = FastAPI(
     title="Crypto Data API",
@@ -17,7 +25,7 @@ def root():
         "message": "🚀 Bienvenido a la Crypto Data API",
         "available_endpoints": [
             "/price/{symbol}?exchange=binance|coinbase|kraken|kucoin",
-            "/convert?from=BTC&to=USD&amount=1"
+            "/convert?from_symbol=BTC&to_symbol=USD&amount=1"
         ]
     }
 
@@ -48,14 +56,8 @@ async def get_price(symbol: str, exchange: str = "binance"):
 
 
 @app.get("/convert")
-async def convert(from_symbol: str, to_symbol: str, amount: float = 1):
-    """
-    Convierte un monto de una moneda (cripto o fiat) a otra usando CoinGecko.
-    - **from_symbol**: ejemplo BTC o USD
-    - **to_symbol**: ejemplo ETH o EUR
-    - **amount**: cantidad a convertir
-    """
-    result = await convert_currency(from_symbol.upper(), to_symbol.upper(), amount)
+async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: bool = False):
+    result = await convert_currency(from_symbol, to_symbol, amount, debug)
     if result is None:
-        return {"error": "Conversión no disponible."}
+        return {"error": "Conversion no disponible"}
     return result

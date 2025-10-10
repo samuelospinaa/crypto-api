@@ -1,6 +1,10 @@
 import httpx
+import os
+from dotenv import load_dotenv
 
-BASE_URL = "https://api.kucoin.com/api/v1/market/orderbook/level1"
+load_dotenv()
+
+BASE_URL = os.getenv("KUCOIN_API")
 
 async def get_kucoin_price(symbol: str) -> float:
     if symbol.endswith("USDT") and "-" not in symbol:

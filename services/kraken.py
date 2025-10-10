@@ -1,6 +1,10 @@
 import httpx
+import os 
+from dotenv import load_dotenv
 
-BASE_URL = "https://api.kraken.com/0/public/Ticker"
+load_dotenv()
+
+BASE_URL = os.getenv("KRAKEN_API")
 
 async def get_kraken_price(symbol: str) -> float:
     # Kraken usa formato diferente: BTCUSDT → XBTUSDT

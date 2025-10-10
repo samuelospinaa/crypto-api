@@ -1,9 +1,13 @@
-# services/coingecko.py
 import httpx
+import asyncio
 from cachetools import TTLCache
+from dotenv import load_dotenv
+import os
 
-BASE_URL = "https://api.coingecko.com/api/v3"
-# Cliente reutilizable con timeout razonable
+load_dotenv()  # Cargar variables de entorno
+
+BASE_URL = os.getenv("COINGECKO_API")
+
 client = httpx.AsyncClient(timeout=10.0)
 
 # Cache: símbolo -> coin_id
@@ -17,13 +21,27 @@ FIATS = {
 
 
 async def _fetch_json(url: str, params: dict):
-    """Helper para llamadas HTTP seguras."""
-    try:
-        r = await client.get(url, params=params)
-        r.raise_for_status()
-        return r.json()
-    except Exception:
-        return None
+    """Helper para llamadas HTTP seguras con headers, retries y logs."""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; CryptoAPI/1.0; +https://rapidapi.com/)",
+        "Accept": "application/json",
+    }
+
+    for attempt in range(3):  # hasta 3 intentos
+        try:
+            r = await client.get(url, params=params, headers=headers)
+            if r.status_code == 200:
+                return r.json()
+            else:
+                print(f"⚠️ CoinGecko respondió {r.status_code} en intento {attempt+1}: {r.text[:100]}")
+        except httpx.RequestError as e:
+            print(f"⚠️ Error de red en intento {attempt+1}: {e}")
+        except Exception as e:
+            print(f"⚠️ Error inesperado en intento {attempt+1}: {e}")
+        await asyncio.sleep(0.5 * (attempt + 1))  # backoff progresivo
+
+    print("❌ Falló obtener datos de CoinGecko tras 3 intentos")
+    return None
 
 
 async def get_coin_id(symbol: str):

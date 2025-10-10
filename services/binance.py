@@ -1,6 +1,10 @@
 import httpx
+import os
+from dotenv import load_dotenv
 
-BASE_URL = "https://api.binance.com/api/v3/ticker/price"
+load_dotenv()
+
+BASE_URL = os.getenv("BINANCE_API")
 
 async def get_binance_price(symbol: str) -> float:
     async with httpx.AsyncClient() as client:

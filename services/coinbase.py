@@ -1,6 +1,10 @@
 import httpx
+import os 
+from dotenv import load_dotenv
 
-BASE_URL = "https://api.coinbase.com/v2/prices"
+load_dotenv()
+
+BASE_URL = os.getenv("COINBASE_API")
 
 async def get_coinbase_price(symbol: str) -> float:
     # Coinbase usa formato BTC-USD en lugar de BTCUSDT
