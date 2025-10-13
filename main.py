@@ -6,7 +6,8 @@ from services.binance import get_binance_price
 from services.coinbase import get_coinbase_price
 from services.kraken import get_kraken_price
 from services.kucoin import get_kucoin_price
-from services.coingecko import convert_currency
+from services.marketcap import convert_currency
+
 
 load_dotenv()  # Cargar variables de entorno
 
@@ -62,10 +63,3 @@ async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: 
         return {"error": "Conversion no disponible"}
     return result
 
-@app.get("/test-coingecko")
-async def test_coingecko():
-    try:
-        r = httpx.get("https://api.coingecko.com/api/v3", timeout=10)
-        return {"status": r.status_code, "response": r.json()}
-    except Exception as e:
-        return {"error": str(e)}
