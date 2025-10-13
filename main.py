@@ -60,7 +60,11 @@ async def get_price(symbol: str, exchange: str = "binance"):
 async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: bool = False):
     result = await convert_currency(from_symbol, to_symbol, amount, debug)
     if result is None:
-        
+
         return {"error": "Conversion no disponible"}
     return result
+
+@app.head("/health")
+def health_check():
+    return {"status": "ok"}
 
