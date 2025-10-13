@@ -67,18 +67,24 @@ async def convert_currency(from_symbol: str, to_symbol: str, amount: float, debu
 
         if cmc_data and "data" in cmc_data:
             data = cmc_data["data"]
-            quote = data.get("quote", {}).get(to_symbol)
-            if quote:
-                price = quote["price"]
-                return {
-                    "from": from_symbol,
-                    "to": to_symbol,
-                    "amount": amount,
-                    "rate": price / amount,
-                    "converted": price,
-                    "source": "coinmarketcap",
-                    "debug": result_debug if debug else None,
-                }
+
+            # CoinMarketCap puede devolver un dict o una lista
+            if isinstance(data, list) and len(data) > 0:
+                data = data[0]
+
+            if isinstance(data, dict):
+                quote = data.get("quote", {}).get(to_symbol)
+                if quote:
+                    price = quote["price"]
+                    return {
+                        "from": from_symbol,
+                        "to": to_symbol,
+                        "amount": amount,
+                        "rate": price / amount,
+                        "converted": price,
+                        "source": "coinmarketcap",
+                        "debug": result_debug if debug else None,
+                    }
     except Exception as e:
         result_debug["cmc_error"] = str(e)
 
