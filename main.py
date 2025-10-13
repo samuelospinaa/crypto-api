@@ -61,3 +61,11 @@ async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: 
     if result is None:
         return {"error": "Conversion no disponible"}
     return result
+
+@app.get("/test-coingecko")
+async def test_coingecko():
+    try:
+        r = httpx.get("https://api.coingecko.com/api/v3", timeout=10)
+        return {"status": r.status_code, "response": r.json()}
+    except Exception as e:
+        return {"error": str(e)}
