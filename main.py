@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 import os
 import httpx
 from dotenv import load_dotenv
@@ -64,7 +64,9 @@ async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: 
         return {"error": "Conversion no disponible"}
     return result
 
+"Health check endpoint for monitoring purposes"
+@app.get("/health")
 @app.head("/health")
-def health_check():
-    return {"status": "ok"}
+async def helath_check():
+    return Response(status_code=200)
 
