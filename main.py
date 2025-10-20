@@ -66,10 +66,15 @@ async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: 
     return result
 
 @app.get("/coins")
-async def list_coins():
-    """Devuelve la lista de monedas disponibles en CoinMarketCap."""
+async def list_coins(limit: int = 100):
+    """
+    Returns a list of all available cryptocurrencies from CoinPaprika.
+    """
     coins = await get_coins()
-    return {"count": len(coins), "coins": coins}
+    return {
+        "count": len(coins[:limit]),
+        "coins": coins[:limit]
+    }
 
 "Health check endpoint for monitoring purposes"
 @app.get("/health")

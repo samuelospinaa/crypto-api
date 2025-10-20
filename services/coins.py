@@ -1,23 +1,32 @@
-import os 
+from cachetools import TTLCache
 import httpx
-from dotenv import load_dotenv
 
-load_dotenv()
+cache = TTLCache(maxsize=1, ttl=3600)  # 1 hour cache
+COINPAPRIKA_BASE = "https://api.coinpaprika.com/v1"
 
-CMC_BASE = "https://pro-api.coinmarketcap.com/v2"
-CMC_API_KEY = os.getenv("MARKETCAP_APIKEY")
+cache = TTLCache(maxsize=1, ttl=3600)  # 1 hour cache
 
 async def get_coins():
-    """Obtiene la lista de monedas disponibles en CoinMarketCap."""
-    url = f"{CMC_BASE}/cryptocurrency/map"
-    headers = {"X-CMC_PRO_API_KEY": CMC_API_KEY}
-    
+    """Obtiene la lista de monedas desde CoinPaprika."""
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, headers=headers)
+        url = f"{COINPAPRIKA_BASE}/coins"
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(url)
             response.raise_for_status()
             data = response.json()
-            return data.get("data", [])
+
+            # Solo devolver monedas activas (filtramos tokens inactivos)
+            active_coins = [
+                {
+                    "id": coin.get("id"),
+                    "name": coin.get("name"),
+                    "symbol": coin.get("symbol"),
+                    "is_active": coin.get("is_active", False),
+                    "type": coin.get("type"),
+                }
+                for coin in data if coin.get("is_active")
+            ]
+            return active_coins
     except Exception as e:
-        print(f"⚠️ Error al obtener las monedas: {e}")
+        print(f"⚠️ Error al obtener la lista de monedas: {e}")
         return []
