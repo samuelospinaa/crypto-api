@@ -7,6 +7,7 @@ from services.coinbase import get_coinbase_price
 from services.kraken import get_kraken_price
 from services.kucoin import get_kucoin_price
 from services.marketcap import convert_currency
+from services.coins import get_coins
 
 
 load_dotenv()  # Cargar variables de entorno
@@ -63,6 +64,12 @@ async def convert(from_symbol: str, to_symbol: str, amount: float = 1.0, debug: 
 
         return {"error": "Conversion no disponible"}
     return result
+
+@app.get("/coins")
+async def list_coins():
+    """Devuelve la lista de monedas disponibles en CoinMarketCap."""
+    coins = await get_coins()
+    return {"count": len(coins), "coins": coins}
 
 "Health check endpoint for monitoring purposes"
 @app.get("/health")
