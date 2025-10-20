@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import httpx
 from dotenv import load_dotenv
@@ -19,6 +20,14 @@ app = FastAPI(
     title="Crypto Data API",
     description="API unificada para obtener precios de criptomonedas desde múltiples exchanges y convertir entre monedas.",
     version="2.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # o especifica rapidapi.com
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
